@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICT exam for Ratul</title>
+    <style>
+        :root {
+            --bg-color: #1a1d24;
+            --card-bg: #222630;
+            --text-color: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --border-color: #334155;
+            --correct-color: #15803d;
+            --correct-bg: #166534;
+            --incorrect-color: #b91c1c;
+            --incorrect-bg: #991b1b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .timer-box {
+            background-color: #111827;
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #f87171;
+        }
+
+        /* Live Score Counter Bar */
+        .live-score-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: flex-start;
+        }
+
+        .badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-correct {
+            background-color: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .badge-wrong {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        main {
+            flex: 1;
+            max-width: 800px;
+            width: 90%;
+            margin: 30px auto;
+            padding-bottom: 50px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Start Screen */
+        .start-container {
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .start-container h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .start-container p {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            font-size: 1.2rem;
+            padding: 12px 35px;
+            border-radius: 8px;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .question-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option-item {
+            background-color: #1a1d24;
+            border: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1rem;
+        }
+
+        .option-item:hover:not(.disabled) {
+            border-color: var(--accent-color);
+            background-color: #262b36;
+        }
+
+        .option-item.disabled {
+            cursor: not-allowed;
+        }
+
+        /* Highlight classes */
+        .option-item.correct {
+            background-color: var(--correct-bg) !important;
+            border-color: #22c55e !important;
+            color: #ffffff !important;
+        }
+
+        .option-item.incorrect {
+            background-color: var(--incorrect-bg) !important;
+            border-color: #ef4444 !important;
+            color: #ffffff !important;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button.secondary {
+            background-color: #374151;
+        }
+
+        button.secondary:hover {
+            background-color: #4b5563;
+        }
+
+        /* Result Card Styles */
+        .result-container {
+            text-align: center;
+        }
+
+        .score-banner {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #4ade80;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .stat-box {
+            background-color: #1a1d24;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .stat-box span {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .review-section {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .review-item {
+            background-color: #1a1d24;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .review-item.correct-ans {
+            border-left: 5px solid #22c55e;
+        }
+
+        .review-item.wrong-ans {
+            border-left: 5px solid #ef4444;
+        }
+
+        .review-q {
+            font-weight: 600;
+            margin-bottom: 8px;
+            white-space: pre-line;
+        }
+
+        .review-details {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>ICT exam for Ratul</h1>
+        <div class="header-right">
+            <div class="timer-box" id="timer">21:00</div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Start Screen Card -->
+        <div id="start-card" class="card">
+            <div class="start-container">
+                <h2>ICT Online Examination</h2>
+                <p>
+                    মোট প্রশ্ন: <b>৪২টি</b><br>
+                    সময়: <b>২১ মিনিট</b><br>
+                    প্রতিটি প্রশ্নের উত্তর দেওয়ার পর তা লক হয়ে যাবে এবং সাথে সাথেই সঠিক/ভুল ফলাফল প্রদর্শিত হবে।
+                </p>
+                <button class="start-btn" onclick="startExam()">Start Exam</button>
+            </div>
+        </div>
+
+        <!-- Quiz Box -->
+        <div id="quiz-card" class="card hidden">
+            <!-- Live Score Display -->
+            <div class="live-score-bar">
+                <div class="badge badge-correct">Correct: <span id="live-correct">0</span></div>
+                <div class="badge badge-wrong">Wrong: <span id="live-wrong">0</span></div>
+            </div>
+
+            <div class="question-header">
+                <span id="q-number">প্রশ্ন ১ / ৪২</span>
+            </div>
+            <div class="question-title" id="question-text">প্রশ্ন লোড হচ্ছে...</div>
+            <div class="options-list" id="options-container">
+                <!-- Options injected by JS -->
+            </div>
+            <div class="navigation-buttons">
+                <button id="prev-btn" class="secondary" onclick="prevQuestion()">পূর্ববর্তী</button>
+                <button id="next-btn" onclick="nextQuestion()">পরবর্তী</button>
+            </div>
+        </div>
+
+        <!-- Result Box -->
+        <div id="result-card" class="card hidden">
+            <div class="result-container">
+                <h2>পরীক্ষা সম্পন্ন হয়েছে!</h2>
+                <div class="score-banner" id="score-percentage">০%</div>
+                <div class="stats-grid">
+                    <div class="stat-box" style="color: #4ade80;">সঠিক <span id="correct-count">০</span></div>
+                    <div class="stat-box" style="color: #f87171;">ভুল <span id="incorrect-count">০</span></div>
+                    <div class="stat-box" style="color: var(--text-muted);">স্কিপড <span id="skipped-count">০</span></div>
+                </div>
+                <button onclick="restartQuiz()">পুনরায় পরীক্ষা দিন</button>
+            </div>
+            
+            <div class="review-section">
+                <h3>উত্তরমালা ও মূল্যায়ন:</h3>
+                <div id="review-list">
+                    <!-- Review items injected by JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; programming with sabbir
+    </footer>
+
+    <script>
+        const questions = [
+            {
+                q: "১. নিচের কোনটির উন্নতির কারণে পৃথিবী একটি একক গ্রামের মতো হয়ে গেছে?",
+                options: ["ক. আইসিটি", "খ. ডিজিটাল ইলেকট্রনিক্স", "গ. স্যাটেলাইট প্রযুক্তি", "ঘ. বৈশ্বিক অর্থনীতি"],
+                answer: 0
+            },
+            {
+                q: "২. “বিশ্বগ্রাম বা বিশ্বায়ন হচ্ছে বিশ্বের সংকোচন ও পরস্পর নির্ভরশীলতা”— উক্তিটি কার?",
+                options: ["ক. রোলান্ড রবার্টসন", "খ. মার্টিন আলব্রো", "গ. মার্শাল ম্যাকলুহান", "ঘ. জ্যাক উইলিয়ামসন"],
+                answer: 2
+            },
+            {
+                q: "৩. বিশ্বগ্রামে যোগাযোগের জন্য প্রয়োজনীয় হার্ডওয়্যার নিচের কোনটি?",
+                options: ["ক. জুম", "খ. হোয়াটসআপ", "গ. ডেটা", "ঘ. স্যাটেলাইট"],
+                answer: 3
+            },
+            {
+                q: "৪. বিশ্বগ্রামের মূলভিত্তি কোনটি?",
+                options: ["ক. তথ্য", "খ. ইন্টারনেট সংযুক্ততা", "গ. সফটওয়্যার", "ঘ. হার্ডওয়্যার"],
+                answer: 1
+            },
+            {
+                q: "৫. কোন ব্যবস্থায় সরশরীরে উপস্থিত থেকে সভায় অংশগ্রহণের প্রয়োজন হয় না?",
+                options: ["ক. ভিডিও কনফারেন্সিং", "খ. টেলিমেডিসিন", "গ. ম্যাসেজিং", "ঘ. চ্যাটিং"],
+                answer: 0
+            },
+            {
+                q: "৬. ইন্টারনেটের মাধ্যমে কর্মসংস্থানের সুযোগকে কী বলে?",
+                options: ["ক. ই-মার্কেটিং", "খ. ই-কমার্স", "গ. ই-বিজনেস", "ঘ. আউটসোসিং"],
+                answer: 3
+            },
+            {
+                q: "৭. সাইবার অপরাধ বৃদ্ধি পাচ্ছে নিচের কোনটির প্রভাবে?",
+                options: ["ক. বিশ্বগ্রাম", "খ. কৃত্রিম বুদ্ধিমত্তা", "গ. ভার্চুয়াল রিয়েলিটি", "ঘ. ই-লার্নিং"],
+                answer: 0
+            },
+            {
+                q: "৮. বিশ্বগ্রামের কারণে কোনটি ঘটেছে?",
+                options: ["ক. বাস্তব সামাজিক যোগাযোগ হ্রাস পায়", "খ. সহনশীলতা হ্রাস পায়", "গ. পারস্পরিক যোগাযোগ হ্রাস পায়", "ঘ. সহানুভূতি ও সহমর্মিতা হ্রাস পায়"],
+                answer: 0
+            },
+            {
+                q: "৯. বিশ্বগ্রাম প্রতিষ্ঠার প্রধান উপকরণসমূহ—\ni. হার্ডওয়্যার সহজলভ্যতা\nii. নেটওয়ার্ক সংযুক্ততা\niii. ডেটা বা ইনফরমেশন\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 3
+            },
+            {
+                q: "১০. বিশ্বগ্রামের সুবিধাসমূহ হচ্ছে—\ni. নিরাপদ ও নিরবচ্ছিন্ন যোগাযোগ\nii. অবাধ তথ্য প্রবাহ\niii. বিজ্ঞান ও প্রযুক্তির সীমিত ব্যবহার\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 0
+            },
+            {
+                q: "১১. অনলাইন শিক্ষা ব্যবস্থায় শিক্ষক ও শিক্ষার্থীদের মাঝে ব্যবহৃত হয়—\ni. বিশেষায়িত কম্পিউটার\nii. ইন্টারনেট\niii. ভার্চুয়াল রিয়েলিটি\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 0
+            },
+            {
+                q: "১২. বর্তমান তথ্য প্রযুক্তির গুরুত্বপূর্ণ বিষয়—\ni. তথ্য শেয়ারণ\nii. তথ্য স্থানান্তর\niii. নিয়ম ও নিরাপত্তা সম্পর্কে সচেতনতা\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 3
+            },
+            {
+                q: "১৩. কোভিড-১৯ মহামারীর কারণে আইসিটি দপ্তরের সকল কর্মী একটি বিশেষ ব্যবস্থা মাধ্যমে সভার আয়োজন করলেন। যেখানে সরশরীরে উপস্থিত না হয়েও অংশগ্রহণকারীগণ কথোপকথন ও দেখতে পারেন। আইসিটি দপ্তরের কর্মীদের সভার বিশেষ ব্যবস্থাটি কী?",
+                options: ["ক. টেলিমেডিসিন", "খ. ভিডিও কনফারেন্সিং", "গ. টেলিচ্যাটিং", "ঘ. টেলিমেসেজিং"],
+                answer: 1
+            },
+            {
+                q: "১৪. উদ্দীপকের ব্যবস্থাটি বাস্তবায়নে প্রয়োজন—\ni. ইন্টারনেট\nii. জুম\niii. মেসেঞ্জার\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 0
+            },
+            {
+                q: "১৫. বিশ্বগ্রাম ধারণার প্রধান উপাদান কোনটি?",
+                options: ["ক. শিক্ষা", "খ. কর্মসংস্থান", "গ. যোগাযোগ", "ঘ. গবেষণা"],
+                answer: 2
+            },
+            {
+                q: "১৬. ই-মেইল সিস্টেম কে চালু করেন?",
+                options: ["ক. রেমন্ড রস", "খ. জাকারিবার্গ", "গ. বিল গেটস", "ঘ. রেমন্ড স্যামুয়েল টমলিনসন"],
+                answer: 3
+            },
+            {
+                q: "১৭. টেলিকনফারেন্সিং এর উদ্ভাবক কে?",
+                options: ["ক. রেমন্ড রস", "খ. জাকারিবার্গ", "গ. মরি টার্ফ", "ঘ. বিল গেটস"],
+                answer: 0
+            },
+            {
+                q: "১৮. কোনটির মাধ্যমে স্বাস্থ্যসেবা জনগণের দোরগোড়ায় পৌঁছে দেওয়া সম্ভব?",
+                options: ["ক. ই-মেইল", "খ. ই-সেবা", "গ. টেলিমেডিসিন", "ঘ. ই-লার্নিং"],
+                answer: 2
+            },
+            {
+                q: "১৯. সাম্প্রতিক চিকিৎসাবিজ্ঞানে অস্ত্রোপচারের ক্ষেত্রে বহুল ব্যবহৃত প্রযুক্তি কোনটি?",
+                options: ["ক. রেডিওথেরাপি", "খ. ল্যাপারোস্কোপিক সার্জারি", "গ. কেমোথেরাপি", "ঘ. ইসিজি"],
+                answer: 1
+            },
+            {
+                q: "২০. নিচের কোনটির মাধ্যমে ই-কমার্সের কাজ করা যায়?",
+                options: ["ক. payoneer.com", "খ. odesk.com", "গ. alibaba.com", "ঘ. netflix.com"],
+                answer: 2
+            },
+            {
+                q: "২১. নিচের কোন ক্লাউড পরিষেবাটি গবেষকদের নিরাপদে ডেটা সংরক্ষণে সহায়তা করে?",
+                options: ["ক. গুগল স্কলার", "খ. মেভেলি", "গ. ড্রপবক্স", "ঘ. SPSS"],
+                answer: 2
+            },
+            {
+                q: "২২. ব্লগ (Blog) এর বাংলা প্রতিশব্দ কী?",
+                options: ["ক. ব্যক্তিকেন্দ্রিক পত্রিকা", "খ. ব্যক্তিকেন্দ্রিক লাইব্রেরি", "গ. সাপ্তাহিক পত্রিকা", "ঘ. পারিবারিক লাইব্রেরি"],
+                answer: 0
+            },
+            {
+                q: "২৩. প্রযুক্তির কল্যাণে স্টুডেন্টরা টেক্সট বইয়ের পরিবর্তে ব্যবহার করে কোনটি?",
+                options: ["ক. ই-বুক", "খ. মাল্টিমিডিয়া", "গ. অ্যানিমেশন", "ঘ. কৃত্রিম বুদ্ধিমত্তা"],
+                answer: 0
+            },
+            {
+                q: "২৪. ভিডিও কনফারেন্সিং এর অন্তর্ভুক্ত—\ni. অডিও\nii. ভিডিও\niii. রেডিও\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 0
+            },
+            {
+                q: "২৫. ই-কমার্স চালু করলে—\ni. ব্যবসায় স্থায়ী স্থাপনার প্রয়োজনীয়তা কমে যায়\nii. ব্যবসার আর্থিক খরচ হ্রাস পায়\niii. ক্রেতা-বিক্রেতার প্রত্যক্ষ যোগাযোগ বৃদ্ধি পায়\nনিচের কোনটি সঠিক?",
+                options: ["ক. i", "খ. i ও ii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 3
+            },
+            {
+                q: "২৬. ইন্টারনেটের কল্যাণে সম্ভব হয়েছে—\ni. ভিডিও চ্যাটিং\nii. ভিডিও কনফারেন্সিং\niii. ই-মেইলিং\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 3
+            },
+            {
+                q: "২৭. শুভ সাহেব এর ছোট ভাই নীল ইউএস মিশনে গেলেন। একদিন একটি প্রযুক্তি ব্যবহার করে শুভ তার অসুস্থ মা এর সাথে নীলের কথা বলার ব্যবস্থা করলেন। অপরদিকে তিনি দ্বিতীয় আরেকটি প্রযুক্তি ব্যবহার করে নীলের সাথে মায়ের কথা ও দেখার ব্যবস্থা করে দিলেন। উদ্দীপকে বিশ্বগ্রামের কোন উপাদানের ইজিতো দেওয়া হয়েছে?",
+                options: ["ক. শিক্ষা", "খ. যোগাযোগ", "গ. চিকিৎসা", "ঘ. অফিস"],
+                answer: 1
+            },
+            {
+                q: "২৮. উদ্দীপকে নীলের ব্যবহৃত প্রযুক্তিতে—\ni. বিশেষ সফটওয়্যার প্রয়োজন\nii. টেলিমেডিসিন সেবা পাওয়া যাবে\niii. বাসস্থান্যের নিরাপত্তা নিশ্চিত করবে\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 0
+            },
+            {
+                q: "২৯. কম্পিউটার সিস্টেমের মাধ্যমে কোনো একটি ঘটনার বাস্তবভিত্তিক ত্রিমাত্রিক রূপায়ণকে কী বলে?",
+                options: ["ক. বায়োমেট্রিক্স", "খ. ন্যানো প্রযুক্তি", "গ. ভার্চুয়াল রিয়েলিটি", "ঘ. বায়োইনফরমেটিক্স"],
+                answer: 2
+            },
+            {
+                q: "৩০. HMD-এর পূর্ণরূপ কী?",
+                options: ["ক. Hand Mountained Display", "খ. Head Motioned Display", "গ. Hand Motioned Display", "ঘ. Head Mounted Display"],
+                answer: 3
+            },
+            {
+                q: "৩১. বাস্তব জগতের সাথে ভার্চুয়াল জগতের এক ধরনের সংমিশ্রণ তৈরি করে কোনটি?",
+                options: ["ক. বায়োমেট্রিক্স", "খ. ভার্চুয়াল রিয়েলিটি", "গ. অগমেন্টেড রিয়েলিটি", "ঘ. বায়োইনফরমেটিক্স"],
+                answer: 2
+            },
+            {
+                q: "৩২. যে বিষয়গুলো বাস্তবে দেখা অসম্ভব সেই বিষয়গুলোকে দেখা যায় কীসের মাধ্যমে?",
+                options: ["ক. আর্টিফিশিয়াল ইন্টেলিজেন্স", "খ. রোবটিক্স", "গ. সিমুলেশন", "ঘ. নিউরাল নেটওয়ার্ক"],
+                answer: 2
+            },
+            {
+                q: "৩৩. সিমুলেটরের প্রধান সুবিধা কোনটি?",
+                options: ["ক. ঝুঁকি কমানো", "খ. রোগ নির্ণয়", "গ. ওষুধ তৈরি", "ঘ. তথ্য সংরক্ষণ"],
+                answer: 0
+            },
+            {
+                q: "৩৪. কার্টুন, অ্যাকশন মুভি ও ঐতিহাসিক ছবি তৈরিতে কোন প্রযুক্তি ব্যবহৃত হয়?",
+                options: ["ক. বায়োমেট্রিক্স", "খ. বায়োইনফরমেটিক্স", "গ. ভার্চুয়াল রিয়েলিটি", "ঘ. ন্যানোটেকনোলজি"],
+                answer: 2
+            },
+            {
+                q: "৩৫. পেশাজীবী চিকিৎসকদের নতুন চিকিৎসা সম্পর্কে ধারণা অর্জন বা প্রশিক্ষণের জন্য ব্যবহৃত হচ্ছে কোনটি?",
+                options: ["ক. ভার্চুয়াল রিয়েলিটি", "খ. ক্রায়োসার্জারি", "গ. জেনেটিক ইঞ্জিনিয়ারিং", "ঘ. বায়োইনফরমেটিক্স"],
+                answer: 0
+            },
+            {
+                q: "৩৬. ভার্চুয়াল রিয়েলিটিতে কৃত্রিম পরিবেশ ব্যবস্থা সৃষ্টি করা হয় কোন পদ্ধতিতে?",
+                options: ["ক. একমাত্রিক সিমুলেশন", "খ. দ্বিমাত্রিক সিমুলেশন", "গ. ত্রিমাত্রিক সিমুলেশন", "ঘ. চতুর্মাত্রিক সিমুলেশন"],
+                answer: 2
+            },
+            {
+                q: "৩৭. কোন কম্পিউটার বিজ্ঞানী প্রথম ভার্চুয়াল রিয়েলিটি টার্মটি ব্যবহার করেন?",
+                options: ["ক. জ্যারন লানিয়ার", "খ. আইজ্যাক আসিমোভ", "গ. ম্যাকআর্থি", "ঘ. টম লিনসন"],
+                answer: 0
+            },
+            {
+                q: "৩৮. ভার্চুয়াল রিয়েলিটিতে ব্যবহৃত হয়—\ni. সিমুলেটর সফটওয়্যার\nii. মেশিন লার্নিং\niii. সংবেদনশীল গ্রাফিক্স\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 1
+            },
+            {
+                q: "৩৯. ভার্চুয়াল রিয়েলিটি নির্ভর নির্মাণ—\ni. কল্পকাহিনী\nii. কার্টুন\niii. ঐতিহাসিক চলচ্চিত্র\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 3
+            },
+            {
+                q: "৪০. ভার্চুয়াল রিয়েলি ব্যবহার হয়—\ni. সামরিক প্রশিক্ষণে\nii. কৃত্রিম অনুভূতি সৃষ্টিতে\niii. ত্রিমাত্রিক ডিজাইনে\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 3
+            },
+            {
+                q: "৪১. বহুমাত্রিক সিমুলেশন পদ্ধতিতে নির্মিত কল্পকাহিনী, পৌরাণিক কাহিনী, কার্টুন, ঐতিহাসিক চলচ্চিত্র নির্মাণ মানুষের কাছে জনপ্রিয়তা ও গ্রহণযোগ্যতা পেয়েছে। বহুমাত্রিক সিমুলেশন পদ্ধতি ব্যবহৃত হয় কোনটিতে?",
+                options: ["ক. ভার্চুয়াল রিয়েলিটি", "খ. ন্যানোটেকনোলজি", "গ. টেলিমেডিসিন", "ঘ. বায়োমেট্রিক্স"],
+                answer: 0
+            },
+            {
+                q: "৪২. ভার্চুয়াল রিয়েলিটির মাধ্যমে নির্মিত ছবি হচ্ছে—\ni. Memento (2000)\nii. Inception (2010)\niii. Interstellar (2014)\nনিচের কোনটি সঠিক?",
+                options: ["ক. i ও ii", "খ. i ও iii", "গ. ii ও iii", "ঘ. i, ii ও iii"],
+                answer: 3
+            }
+        ];
+
+        let currentIdx = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let timeLeft = 21 * 60;
+        let timerInterval;
+
+        function startExam() {
+            document.getElementById('start-card').classList.add('hidden');
+            document.getElementById('quiz-card').classList.remove('hidden');
+            startTimer();
+            loadQuestion();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                    return;
+                }
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timer').innerText = 
+                    `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function updateLiveScore() {
+            let correct = 0;
+            let wrong = 0;
+            userAnswers.forEach((ans, idx) => {
+                if (ans !== null) {
+                    if (ans === questions[idx].answer) {
+                        correct++;
+                    } else {
+                        wrong++;
+                    }
+                }
+            });
+            document.getElementById('live-correct').innerText = correct;
+            document.getElementById('live-wrong').innerText = wrong;
+        }
+
+        function loadQuestion() {
+            const q = questions[currentIdx];
+            document.getElementById('q-number').innerText = `প্রশ্ন ${currentIdx + 1} / ${questions.length}`;
+            document.getElementById('question-text').innerText = q.q;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const answered = userAnswers[currentIdx] !== null;
+
+            q.options.forEach((opt, idx) => {
+                const item = document.createElement('div');
+                item.className = 'option-item';
+                
+                let iconText = '';
+                if (answered) {
+                    item.classList.add('disabled');
+                    if (idx === q.answer) {
+                        item.classList.add('correct');
+                        iconText = '✔';
+                    }
+                    if (userAnswers[currentIdx] === idx && idx !== q.answer) {
+                        item.classList.add('incorrect');
+                        iconText = '✖';
+                    }
+                } else {
+                    item.onclick = () => selectOption(idx);
+                }
+
+                item.innerHTML = `
+                    <span>${opt}</span>
+                    <span>${iconText}</span>
+                `;
+                optionsContainer.appendChild(item);
+            });
+
+            document.getElementById('prev-btn').style.display = currentIdx === 0 ? 'none' : 'block';
+            document.getElementById('next-btn').innerText = currentIdx === questions.length - 1 ? 'সাবমিট' : 'পরবর্তী';
+            
+            updateLiveScore();
+        }
+
+        function selectOption(idx) {
+            if (userAnswers[currentIdx] !== null) return;
+            userAnswers[currentIdx] = idx;
+            loadQuestion();
+        }
+
+        function nextQuestion() {
+            if (currentIdx < questions.length - 1) {
+                currentIdx++;
+                loadQuestion();
+            } else {
+                if (confirm('আপনি কি পরীক্ষা জমা দিতে চান?')) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                }
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                loadQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            document.getElementById('quiz-card').classList.add('hidden');
+            document.getElementById('result-card').classList.remove('hidden');
+
+            let correct = 0;
+            let incorrect = 0;
+            let skipped = 0;
+
+            let reviewHtml = '';
+
+            questions.forEach((q, i) => {
+                const userAns = userAnswers[i];
+                const rightAns = q.answer;
+                let statusClass = '';
+                let statusText = '';
+
+                if (userAns === null) {
+                    skipped++;
+                    statusClass = '';
+                    statusText = 'স্কিপ করা হয়েছে';
+                } else if (userAns === rightAns) {
+                    correct++;
+                    statusClass = 'correct-ans';
+                    statusText = 'সঠিক ✔';
+                } else {
+                    incorrect++;
+                    statusClass = 'wrong-ans';
+                    statusText = 'ভুল ✖';
+                }
+
+                reviewHtml += `
+                    <div class="review-item ${statusClass}">
+                        <div class="review-q">${q.q}</div>
+                        <div class="review-details">
+                            আপনার উত্তর: ${userAns !== null ? q.options[userAns] : 'উত্তর দেননি'}<br>
+                            সঠিক উত্তর: <span style="color: #4ade80; font-weight: bold;">${q.options[rightAns]} ✔</span><br>
+                            স্ট্যাটাস: <b>${statusText}</b>
+                        </div>
+                    </div>
+                `;
+            });
+
+            let percentage = Math.round((correct / questions.length) * 100);
+            document.getElementById('score-percentage').innerText = `${percentage}%`;
+            document.getElementById('correct-count').innerText = correct;
+            document.getElementById('incorrect-count').innerText = incorrect;
+            document.getElementById('skipped-count').innerText = skipped;
+            document.getElementById('review-list').innerHTML = reviewHtml;
+        }
+
+        function restartQuiz() {
+            currentIdx = 0;
+            userAnswers = new Array(questions.length).fill(null);
+            timeLeft = 21 * 60;
+            document.getElementById('timer').innerText = "21:00";
+            document.getElementById('result-card').classList.add('hidden');
+            document.getElementById('start-card').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
